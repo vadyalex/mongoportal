@@ -2,14 +2,21 @@ package me.vadyalex.mongoportal.cmd;
 
 
 import com.beust.jcommander.Parameter;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import com.google.common.net.HostAndPort;
 import com.mongodb.ServerAddress;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Arguments {
+
+    public static final String VERSION_FILE = "VERSION.txt";
 
     @Parameter(names = {"-h", "--host"}, description = "Single instance or replica set hosts with or without port where data is located", required = true)
     private List<String> hosts;
@@ -28,6 +35,9 @@ public class Arguments {
 
     @Parameter(names = {"-tc", "--to-collection"}, description = "Collection name where to teleport data to. May be omitted then original collection name is used")
     private String toCollection;
+
+    @Parameter(names = {"--version"}, description = "Print version", help = true)
+    private boolean version;
 
     @Parameter(names = {"--help"}, description = "Print usage info", help = true)
     private boolean help;
@@ -68,6 +78,36 @@ public class Arguments {
 
     public boolean isHelp() {
         return help;
+    }
+
+    public boolean isVersion() {
+        return version;
+    }
+
+    public String getVersion() {
+        return Optional
+                .ofNullable(
+                        this.getClass().getClassLoader().getResource(VERSION_FILE)
+                )
+                .filter(
+                        Objects::nonNull
+                )
+                .map(
+                        url -> {
+                            try {
+                                return Resources.toString(
+                                        url,
+                                        Charsets.UTF_8
+                                );
+                            } catch (IOException e) {
+                                return null;
+                            }
+
+                        }
+                )
+                .orElse(
+                        "UNKNOWN"
+                );
     }
 
     public List<ServerAddress> getHostsAsServerAddress() {

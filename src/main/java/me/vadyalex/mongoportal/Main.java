@@ -19,11 +19,24 @@ public class Main {
             commander.usage();
             return;
         } else {
-            commander.parse(args);
+            try {
+                commander.parse(args);
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                System.err.println("Run without arguments to see usage information");
+                System.exit(1);
+            }
         }
 
         if (arguments.isHelp()) {
             commander.usage();
+            return;
+        }
+
+        if (arguments.isVersion()) {
+            System.out.println(
+                    arguments.getVersion()
+            );
             return;
         }
 
